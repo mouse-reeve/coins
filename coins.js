@@ -1,70 +1,200 @@
+var black, white;
+
+function preload() {
+    font = loadFont('Lato-Bold.ttf');
+}
+
 function setup() {
     createCanvas(500, 500);
 
-    coin(10, 10);
+    black = color('#000');
+    white = color('#FFF');
+
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            var coin = new Coin(10 + 150 * i, 10 + 150 * j);
+            coin.draw_coin();
+        }
+    }
 
     noLoop();
 }
 
-function coin(x, y) {
-    // ----- MATERIAL
-    // hex color reference: https://web.njit.edu/~kevin/rgb.txt.html#metallic
-    noStroke();
-    var metals = {
-        'copper': '#B87333',
-        'brass': '#B5A642',
-        'bronze': '#8C7853',
-        'gold': '#CFB53B',
-        'silver': '#C0C0C0',
-        'steel': '#545454',
+class Coin {
+    constructor(x, y) {
+        this.radius = randint(40, 90);
+
+        // position correctly on screen
+        this.x = x + this.radius;
+        this.y = y + this.radius;
+
+        this.point_radius = this.radius - (this.radius / randint(15, 20));
+        // points on a star or sides of a polygon
+        this.points = randint(9, 15);
+
+        this.metal = color('#DDD');
+
+        // keep track of which elements have been added to a coin
+        this.components = [];
     }
 
-    var metal = metals[choose(Object.keys(metals))];
-    fill(metal);
+    draw_coin() {
+        this.base();
+        // it seems like almost all coins have a border.
+        this.border();
 
-    // ----- COIN SHAPE
-    var shape = choose([circle, star, polygon])
+        if (Math.random() > 0.65) {
+            this.flower();
+        }
 
-    var radius = randint(40, 90);
-    // position correctly on screen
-    x = x + radius;
-    y = y + radius;
+        if (this.components.indexOf('dots') == -1
+            && this.components.indexOf('flower') == -1
+            && Math.random() > 0.8) {
+            this.crossbars();
+        }
 
-    var radius2 = radius - (radius / randint(12, 20));
-    var points = randint(9, 30);
-
-    // 3 dimensionality;
-    var depth = randint(3, 5);
-    push();
-    var shadow_color = lerpColor(color(metal), color('#000'), 0.5)
-    fill(shadow_color);
-    for (var i = 0; i < depth; i++) {
-        shape(x+i, y+i, radius, points, radius2);
+        if (this.components.indexOf('flower') == -1) {
+            this.text();
+        }
     }
-    pop();
 
+    base() {
+        fill(this.metal);
+        stroke(lerpColor(this.metal, black, 0.2));
 
-    shape(x, y, radius, points, radius2);
+        // ----- COIN SHAPE
+        var shape = choose([circle, star, polygon])
 
-    // ----- BORDER
-    push();
-    var shadow_color = lerpColor(color(metal), color('#000'), 0.2)
-    fill(shadow_color);
-    var border_radius = radius2 - (radius2 / randint(6, 10));
-    circle(x, y, border_radius);
-    pop();
+        // 3 dimensionality;
+        var depth = randint(3, 5);
+        push();
+        var shadow_color = lerpColor(this.metal, black, 0.5)
+        fill(shadow_color);
+        for (var i = 0; i < depth; i++) {
+            shape(this.x+i, this.y+i, this.radius, this.points, this.point_radius);
+        }
+        pop();
 
+        shape(this.x, this.y, this.radius, this.points, this.point_radius);
+    }
+
+    border() {
+        push();
+        var shadow_color = lerpColor(this.metal, black, 0.1)
+        stroke(lerpColor(this.metal, black, 0.2));
+        fill(shadow_color);
+        this.border_radius = this.point_radius - (this.point_radius / randint(4, 20));
+        circle(this.x, this.y, this.border_radius);
+        pop();
+
+        // there are often dots around the border
+        if (Math.random() > 0.3) {
+            this.border_dots();
+        }
+    }
+
+    border_dots() {
+        this.components.push('dots');
+        push();
+        fill(lerpColor(this.metal, white, 0.8));
+        var dot_radius = Math.ceil(this.radius / 70);
+        var dot_count = (TWO_PI * this.border_radius) / (dot_radius * 2 + 3);
+        var angle = TWO_PI / dot_count;
+
+        var offset = 2;
+        // with a large border, you can put the dots inside
+        if (this.radius - this.border_radius > 11 && Math.random() > 0.6) {
+            var offset = -1 * (4 + dot_radius);
+            fill(lerpColor(this.metal, black, 0.1));
+        }
+        for (var a = 0; a < TWO_PI; a += angle) {
+            var sx = this.x + cos(a) * (this.border_radius - dot_radius - offset);
+            var sy = this.y + sin(a) * (this.border_radius - dot_radius - offset);
+            circle(sx, sy, dot_radius);
+        }
+        pop()
+    }
+
+    crossbars() {
+        this.components.push('bars');
+        push();
+        var count = randint(3, 5);
+        var offset = this.radius / 10;
+        strokeWeight(offset / 3);
+        stroke(this.metal);
+
+        var radius = this.border_radius || this.radius;
+        var angle = TWO_PI / 50;
+        var a = PI;
+        for (var i = 0; i < count; i++) {
+            a += angle;
+            var x1 = this.x + radius * cos(a) + 2;
+            var y1 = this.y + radius * sin(a);
+            var x2 = this.x + radius * cos(a + PI) - 2;
+            line(x1, y1, x2, y1);
+        }
+        pop();
+    }
+
+    flower() {
+        this.components.push('flower');
+        push();
+
+        var concentric = choose([1, 2, 2]);
+
+        var points = randint(1, 3) * 2 + 1;
+        for (var i = 0; i < concentric; i++) {
+            var depth = randint(6, 20) / 10;
+            var radius = (this.border_radius || this.radius) / (depth + 1);
+            radius = radius / (i + 1 - (i * 0.8));
+            var angle = TWO_PI / points;
+
+            var angle_offset = i * angle / 2;
+
+            for (var a = angle_offset; a < TWO_PI; a += angle) {
+                var cx1 = this.x + radius * cos(a + (angle / 2));
+                var cy1 = this.y + radius * sin(a + (angle / 2));
+                var x1 = this.x + radius * cos(a + (angle / 4));
+                var y1 = this.y + radius * sin(a + (angle / 4));
+                var cx2 = this.x + (radius * depth) * cos(a);
+                var cy2 = this.y + (radius * depth) * sin(a);
+
+                bezier(this.x, this.y, cx1, cy1, x1, y1, cx2, cy2);
+
+                cx1 = this.x + radius * cos(a - (angle / 2));
+                cy1 = this.y + radius * sin(a - (angle / 2));
+                x1 = this.x + radius * cos(a - (angle / 4));
+                y1 = this.y + radius * sin(a - (angle / 4));
+                cx2 = this.x + (radius * depth) * cos(a);
+                cy2 = this.y + (radius * depth) * sin(a);
+
+                bezier(this.x, this.y, cx1, cy1, x1, y1, cx2, cy2);
+            }
+        }
+
+        circle(this.x, this.y, radius * (concentric * 0.8) / 4);
+
+        pop();
+    }
+
+    text() {
+        this.components.push('text');
+        push();
+        textFont(font);
+        textSize(this.radius/3);
+        textAlign(CENTER, TOP);
+        text('1 EURO', this.x, this.y);
+        pop();
+    }
 }
 
 // --------- Random functions, because I miss python
 function choose(choices) {
     return choices[Math.floor(Math.random() * choices.length)];
 }
-function randbool() {
-    return Math.random > 0.5;
-}
 
 function randint(min, max) {
+    max += 1;
     return Math.floor((Math.random() * (max - min)) + min);
 }
 
@@ -76,14 +206,14 @@ function circle(x, y, radius) {
 }
 
 // taken directly from p5js.org examples
-function star(x, y, radius1, points, radius2) {
-    // args in this order to match polygon
+function star(x, y, radius1, points, point_radius) {
+    // args in order to match polygon
     var angle = TWO_PI / points;
     var half_angle = angle / 2;
     beginShape();
     for (var a = 0; a < TWO_PI; a += angle) {
-        var sx = x + cos(a) * radius2;
-        var sy = y + sin(a) * radius2;
+        var sx = x + cos(a) * point_radius;
+        var sy = y + sin(a) * point_radius;
         vertex(sx, sy);
         sx = x + cos(a+half_angle) * radius1;
         sy = y + sin(a+half_angle) * radius1;
