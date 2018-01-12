@@ -43,7 +43,7 @@ class Coin {
         // it seems like almost all coins have a border.
         this.border();
 
-        if (Math.random() > 0) {//.65) {
+        if (Math.random() > 0.65) {
             this.flower();
         }
 
@@ -187,7 +187,7 @@ class Coin {
             message = '1EURO';
             textSize(this.radius/6);
             message = message.split('');
-            var multipliers = [];// [-3, -2, -1, 0, 1, 2, 3];
+            var multipliers = [];
             for (i = 0 - message.length / 2; i < message.length / 2; i++) {
                 multipliers.push(i);
             }
