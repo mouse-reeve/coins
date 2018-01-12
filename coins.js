@@ -194,18 +194,19 @@ class Coin {
             var angle = HALF_PI / message.length;
             var a = 5 * PI / 4;
 
-            var radius = (this.border_radius || this.radius) * 0.6
+            var radius = (this.border_radius || this.radius) * 0.7;
             if (this.radius - this.border_radius > (this.radius / 4)) {
-                radius = this.radius * 0.75;
+                var modifier = this.has_item('circle') ? 0.8 : 0.7;
+                radius = this.radius * modifier;
             }
             for (var i = 0; i < message.length; i++) {
                 var x = this.x - radius * cos(a);
                 var y = this.y - radius * sin(a);
-                push()
+                push();
                 translate(x, y);
                 rotate(angle * multipliers[i]);
                 text(message[message.length - i - 1], 0, 0);
-                pop()
+                pop();
                 a += angle;
             }
         } else {
