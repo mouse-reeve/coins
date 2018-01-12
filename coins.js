@@ -1,7 +1,7 @@
 var black, white;
 
 function preload() {
-    font = loadFont('Lato-Bold.ttf');
+    lato = loadFont('Lato-Bold.ttf');
 }
 
 function setup() {
@@ -43,7 +43,7 @@ class Coin {
         // it seems like almost all coins have a border.
         this.border();
 
-        if (Math.random() > 0.65) {
+        if (Math.random() > 0) {//.65) {
             this.flower();
         }
 
@@ -79,7 +79,7 @@ class Coin {
         var shadow_color = lerpColor(this.metal, black, 0.1)
         stroke(lerpColor(this.metal, black, 0.2));
         fill(shadow_color);
-        this.border_radius = this.point_radius - (this.point_radius / randint(4, 20));
+        this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
         circle(this.x, this.y, this.border_radius);
         pop();
 
@@ -176,8 +176,7 @@ class Coin {
     cointext() {
         this.components.push('text');
         push();
-        textFont(font);
-        textSize(this.radius/4);
+        textFont(lato);
         textAlign(CENTER, TOP);
 
         fill(lerpColor(this.metal, white, 0.3));
@@ -185,11 +184,20 @@ class Coin {
         var message = '1 EURO';
 
         if (this.has_item('flower') || this.has_item('hole')) {
+            message = '1EURO';
+            textSize(this.radius/6);
             message = message.split('');
+            var multipliers = [];// [-3, -2, -1, 0, 1, 2, 3];
+            for (i = 0 - message.length / 2; i < message.length / 2; i++) {
+                multipliers.push(i);
+            }
             var angle = HALF_PI / message.length;
             var a = 5 * PI / 4;
-            var radius = (this.border_radius || this.radius) * 0.6;
-            var multipliers = [-3, -2, -1, 0, 1, 2, 3];
+
+            var radius = (this.border_radius || this.radius) * 0.6
+            if (this.radius - this.border_radius > (this.radius / 4)) {
+                radius = this.radius * 0.75;
+            }
             for (var i = 0; i < message.length; i++) {
                 var x = this.x - radius * cos(a);
                 var y = this.y - radius * sin(a);
@@ -201,6 +209,7 @@ class Coin {
                 a += angle;
             }
         } else {
+            textSize(this.radius/3);
              text('1 EURO', this.x, this.y);
         }
         pop();
