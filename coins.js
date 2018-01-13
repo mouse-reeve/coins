@@ -22,18 +22,18 @@ function setup() {
 
 class Coin {
     constructor(x, y) {
-        this.radius = randint(40, 90);
+        this.radius = random(40, 90);
 
         // position correctly on screen
         this.x = x + this.radius;
         this.y = y + this.radius;
 
-        this.point_radius = this.radius - (this.radius / randint(15, 20));
+        this.point_radius = this.radius - (this.radius / random(15, 20));
         // points on a star or sides of a polygon
-        this.points = randint(9, 15);
+        this.points = random(9, 15);
 
         this.metal = color('#DDD');
-        this.depth = randint(3, 5);
+        this.depth = random(3, 5);
         this.shadow_color = lerpColor(this.metal, black, 0.5);
         this.default_stroke = lerpColor(this.metal, black, 0.3);
 
@@ -63,7 +63,7 @@ class Coin {
         stroke(this.default_stroke);
 
         // ----- COIN SHAPE
-        this.shape = choose(['circle', 'star', 'polygon'])
+        this.shape = random(['circle', 'star', 'polygon'])
 
         // 3 dimensionality;
         push();
@@ -83,7 +83,7 @@ class Coin {
         var shadow_color = lerpColor(this.metal, black, 0.1);
         stroke(lerpColor(this.metal, black, 0.2));
         fill(shadow_color);
-        this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
+        this.border_radius = this.point_radius - (this.point_radius / random(3, 20));
         circle(this.x, this.y, this.border_radius);
         pop();
 
@@ -119,7 +119,7 @@ class Coin {
     crossbars() {
         this.components.push('bars');
         push();
-        var count = randint(3, 5);
+        var count = random(3, 5);
         var offset = this.radius / 10;
         strokeWeight(offset / 3);
         stroke(this.metal);
@@ -143,11 +143,11 @@ class Coin {
 
         fill(this.metal);
         stroke(this.default_stroke);
-        var concentric = choose([1, 2, 2]);
+        var concentric = random([1, 2, 2]);
 
-        var points = randint(1, 3) * 2 + 1;
+        var points = random(1, 3) * 2 + 1;
         for (var i = 0; i < concentric; i++) {
-            var depth = randint(6, 20) / 10;
+            var depth = random(6, 20) / 10;
             var radius = (this.border_radius || this.radius) / (depth + 1);
             radius = radius / (i + 1 - (i * 0.8));
             var angle = TWO_PI / points;
@@ -227,17 +227,6 @@ class Coin {
         return this.components.indexOf(name) != -1;
     }
 }
-
-// --------- Random functions, because I miss python
-function choose(choices) {
-    return choices[Math.floor(Math.random() * choices.length)];
-}
-
-function randint(min, max) {
-    max += 1;
-    return Math.floor((Math.random() * (max - min)) + min);
-}
-
 
 // --------- Shape functions
 function circle(x, y, radius) {
