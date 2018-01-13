@@ -80,7 +80,7 @@ class Coin {
 
     border() {
         push();
-        var shadow_color = lerpColor(this.metal, black, 0.1)
+        var shadow_color = lerpColor(this.metal, black, 0.1);
         stroke(lerpColor(this.metal, black, 0.2));
         fill(shadow_color);
         this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
@@ -190,7 +190,7 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.3));
         var message = '1 EURO';
 
-        if (this.has_item('flower') || this.has_item('hole')) {
+        if (!this.has_item('bars')) {
             message = '1EURO';
             textSize(this.radius/6);
             message = message.split('');
