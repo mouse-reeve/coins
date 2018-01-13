@@ -39,7 +39,7 @@ class Coin {
 
         // hole info
         this.hole_edges = random([3, 4, 5, 6, 100]);
-        this.hole_radius = this.radius / randint(2, 4);
+        this.hole_radius = this.radius / random([2.5, 2.75, 3, 3.25, 3.5]);
 
         // keep track of which elements have been added to a coin
         this.components = [];
@@ -59,7 +59,7 @@ class Coin {
                 this.flower();
             }
 
-            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.8) {
+            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.5) {
                 this.crossbars();
             }
         }
@@ -103,12 +103,22 @@ class Coin {
 
     border() {
         push();
-        var shadow_color = lerpColor(this.metal, black, 0.1);
+        var indent_color = lerpColor(this.metal, black, 0.1);
         stroke(lerpColor(this.metal, black, 0.2));
-        fill(shadow_color);
+        fill(indent_color);
         this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
+
+        this.border_inset = this.border_radius / 40;
         this.circle(this.x, this.y, this.border_radius, true);
         pop();
+
+        // border shadow
+        push();
+        noStroke();
+        fill(this.shadow_color);
+        this.crescent(this.x, this.y, this.border_radius, this.border_inset);
+        pop();
+
 
         // there are often dots around the border
         if (Math.random() > 0.3) {
@@ -126,14 +136,17 @@ class Coin {
         var angle = TWO_PI / dot_count;
 
         var offset = 2;
+        var inset = this.border_inset;
         // with a large border, you can put the dots inside
         if (this.radius - this.border_radius > 11 && Math.random() > 0.6) {
             var offset = -1 * (4 + dot_radius);
+            inset = 0;
             fill(lerpColor(this.metal, black, 0.1));
         }
+
         for (var a = 0; a < TWO_PI; a += angle) {
-            var sx = this.x + cos(a) * (this.border_radius - dot_radius - offset);
-            var sy = this.y + sin(a) * (this.border_radius - dot_radius - offset);
+            var sx = (this.x + inset) + cos(a) * (this.border_radius - dot_radius - offset);
+            var sy = (this.y + inset) + sin(a) * (this.border_radius - dot_radius - offset);
             this.circle(sx, sy, dot_radius);
         }
         pop()
@@ -153,9 +166,9 @@ class Coin {
         for (var i = 0; i < count; i++) {
             a += angle;
             var x1 = this.x + radius * cos(a) + 2;
-            var y1 = this.y + radius * sin(a);
+            var y = this.y + radius * sin(a);
             var x2 = this.x + radius * cos(a + PI) - 2;
-            line(x1, y1, x2, y1);
+            line(x1, y, x2, y);
         }
         pop();
     }
@@ -225,13 +238,16 @@ class Coin {
             var a = 5 * PI / 4;
 
             var radius = (this.border_radius || this.radius) * 0.7;
+            var inset = this.border_inset
+            // place the text on the outside edge
             if (this.radius - this.border_radius > (this.radius / 4)) {
                 var modifier = this.has_item('circle') ? 0.8 : 0.7;
                 radius = this.radius * modifier;
+                inset = 0;
             }
             for (var i = 0; i < message.length; i++) {
-                var x = this.x - radius * cos(a);
-                var y = this.y - radius * sin(a);
+                var x = this.x - radius * cos(a) + inset;
+                var y = this.y - radius * sin(a) + inset;
                 push();
                 translate(x, y);
                 rotate(angle * multipliers[i]);
@@ -303,6 +319,30 @@ class Coin {
             endContour();
             pop();
         }
+    }
+
+    crescent(x, y, radius, offset_value) {
+        beginShape();
+
+        var angle = TWO_PI / 100;
+        for (var a = 0; a < TWO_PI; a += angle) {
+            var sx = x + cos(a) * radius;
+            var sy = y + sin(a) * radius;
+            vertex(sx, sy);
+        }
+
+        beginContour();
+        for (var a = TWO_PI; a > 0; a -= angle) {
+            var offset = 0;
+            if (a > 3 * PI / 4 && a < 7 * PI / 4) {
+                offset = offset_value
+            }
+            var sx = x + offset + cos(a) * radius;
+            var sy = y + offset + sin(a) * radius;
+            vertex(sx, sy);
+        }
+        endContour();
+        endShape();
     }
 
 }
