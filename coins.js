@@ -70,11 +70,11 @@ class Coin {
         noStroke();
         fill(this.shadow_color);
         for (var i = 0; i < this.depth; i++) {
-            eval(this.shape)(this.x+i, this.y+i, this.radius, this.points, this.point_radius);
+            eval('this.' + this.shape)(this.x+i, this.y+i, this.radius, this.points, this.point_radius);
         }
         pop();
 
-        eval(this.shape)(this.x, this.y, this.radius, this.points, this.point_radius);
+        eval('this.' + this.shape)(this.x, this.y, this.radius, this.points, this.point_radius);
         pop();
     }
 
@@ -84,7 +84,7 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.2));
         fill(shadow_color);
         this.border_radius = this.point_radius - (this.point_radius / random(3, 20));
-        circle(this.x, this.y, this.border_radius);
+        this.circle(this.x, this.y, this.border_radius);
         pop();
 
         // there are often dots around the border
@@ -111,7 +111,7 @@ class Coin {
         for (var a = 0; a < TWO_PI; a += angle) {
             var sx = this.x + cos(a) * (this.border_radius - dot_radius - offset);
             var sy = this.y + sin(a) * (this.border_radius - dot_radius - offset);
-            circle(sx, sy, dot_radius);
+            this.circle(sx, sy, dot_radius);
         }
         pop()
     }
@@ -175,7 +175,7 @@ class Coin {
             }
         }
 
-        circle(this.x, this.y, radius * (concentric * 0.8) / 4);
+        this.circle(this.x, this.y, radius * (concentric * 0.8) / 4);
 
         pop();
     }
@@ -226,38 +226,40 @@ class Coin {
     has_item(name) {
         return this.components.indexOf(name) != -1;
     }
-}
 
-// --------- Shape functions
-function circle(x, y, radius) {
-    var diameter = radius * 2;
-    return ellipse(x, y, diameter, diameter);
-}
-
-// taken directly from p5js.org examples
-function star(x, y, radius1, points, point_radius) {
-    // args in order to match polygon
-    var angle = TWO_PI / points;
-    var half_angle = angle / 2;
-    beginShape();
-    for (var a = 0; a < TWO_PI; a += angle) {
-        var sx = x + cos(a) * point_radius;
-        var sy = y + sin(a) * point_radius;
-        vertex(sx, sy);
-        sx = x + cos(a+half_angle) * radius1;
-        sy = y + sin(a+half_angle) * radius1;
-        vertex(sx, sy);
+    // shape functions
+    circle(x, y, radius) {
+        var diameter = radius * 2;
+        return ellipse(x, y, diameter, diameter);
     }
-    endShape(CLOSE);
+
+    // taken directly from p5js.org examples
+    star(x, y, radius1, points, point_radius) {
+        // args in order to match polygon
+        var angle = TWO_PI / points;
+        var half_angle = angle / 2;
+        beginShape();
+        for (var a = 0; a < TWO_PI; a += angle) {
+            var sx = x + cos(a) * point_radius;
+            var sy = y + sin(a) * point_radius;
+            vertex(sx, sy);
+            sx = x + cos(a+half_angle) * radius1;
+            sy = y + sin(a+half_angle) * radius1;
+            vertex(sx, sy);
+        }
+        endShape(CLOSE);
+    }
+
+    polygon(x, y, radius, npoints) {
+        var angle = TWO_PI / npoints;
+        beginShape();
+        for (var a = 0; a < TWO_PI; a += angle) {
+            var sx = x + cos(a) * radius;
+            var sy = y + sin(a) * radius;
+            vertex(sx, sy);
+        }
+        endShape(CLOSE);
+    }
+
 }
 
-function polygon(x, y, radius, npoints) {
-    var angle = TWO_PI / npoints;
-    beginShape();
-    for (var a = 0; a < TWO_PI; a += angle) {
-        var sx = x + cos(a) * radius;
-        var sy = y + sin(a) * radius;
-        vertex(sx, sy);
-    }
-    endShape(CLOSE);
-}
