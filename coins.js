@@ -37,21 +37,31 @@ class Coin {
         this.shadow_color = lerpColor(this.metal, black, 0.5);
         this.default_stroke = lerpColor(this.metal, black, 0.3);
 
+        // hole info
+        this.hole_edges = random([3, 4, 5, 6, 100]);
+        this.hole_radius = this.radius / randint(2, 4);
+
         // keep track of which elements have been added to a coin
         this.components = [];
     }
 
     draw_coin() {
+        if (Math.random() > 0.7) {
+            this.components.push('hole');
+        }
+
         this.base();
         // it seems like almost all coins have a border.
         this.border();
 
-        if (Math.random() > 0.65) {
-            this.flower();
-        }
+        if (!this.has_item('hole')) {
+            if (Math.random() > 0.65) {
+                this.flower();
+            }
 
-        if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.8) {
-            this.crossbars();
+            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.8) {
+                this.crossbars();
+            }
         }
 
         this.cointext();
@@ -71,21 +81,21 @@ class Coin {
         fill(this.shadow_color);
         for (var i = 0; i < this.depth; i++) {
             if (this.shape == 'circle') {
-                this.circle(this.x + i, this.y + i, this.radius);
+                this.circle(this.x + i, this.y + i, this.radius, true);
             } else if (this.shape == 'star') {
-                this.star(this.x + i, this.y + i, this.radius, this.points, this.point_radius);
+                this.star(this.x + i, this.y + i, this.radius, this.points, this.point_radius, true);
             } else if (this.shape == 'polygon') {
-                this.polygon(this.x + i, this.y + i, this.radius, this.points);
+                this.polygon(this.x + i, this.y + i, this.radius, this.points, true);
             }
         }
         pop();
 
         if (this.shape == 'circle') {
-            this.circle(this.x, this.y, this.radius);
+            this.circle(this.x, this.y, this.radius, true);
         } else if (this.shape == 'star') {
-            this.star(this.x, this.y, this.radius, this.points, this.point_radius);
+            this.star(this.x, this.y, this.radius, this.points, this.point_radius, true);
         } else if (this.shape == 'polygon') {
-            this.polygon(this.x, this.y, this.radius, this.points);
+            this.polygon(this.x, this.y, this.radius, this.points, true);
         }
 
         pop();
@@ -97,7 +107,7 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.2));
         fill(shadow_color);
         this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
-        this.circle(this.x, this.y, this.border_radius);
+        this.circle(this.x, this.y, this.border_radius, true);
         pop();
 
         // there are often dots around the border
@@ -241,12 +251,12 @@ class Coin {
     }
 
     // shape functions
-    circle(x, y, radius) {
-        this.polygon(x, y, radius, 100);
+    circle(x, y, radius, holeable) {
+        this.polygon(x, y, radius, 100, holeable);
     }
 
     // taken directly from p5js.org examples
-    star(x, y, radius1, points, point_radius) {
+    star(x, y, radius1, points, point_radius, holeable) {
         // args in order to match polygon
         var angle = TWO_PI / points;
         var half_angle = angle / 2;
@@ -259,10 +269,13 @@ class Coin {
             sy = y + sin(a+half_angle) * radius1;
             vertex(sx, sy);
         }
+        if (holeable) {
+            this.hole(x, y);
+        }
         endShape(CLOSE);
     }
 
-    polygon(x, y, radius, npoints) {
+    polygon(x, y, radius, npoints, holeable) {
         var angle = TWO_PI / npoints;
         beginShape();
         for (var a = 0; a < TWO_PI; a += angle) {
@@ -270,7 +283,26 @@ class Coin {
             var sy = y + sin(a) * radius;
             vertex(sx, sy);
         }
+        if (holeable) {
+            this.hole(x, y);
+        }
         endShape(CLOSE);
+    }
+
+    hole(x, y) {
+        if (this.has_item('hole')) {
+            push();
+            var angle = TWO_PI / this.hole_edges;
+            beginContour();
+            noStroke();
+            for (var a = TWO_PI; a > 0; a -= angle) {
+                var sx = x + cos(a) * this.hole_radius;
+                var sy = y + sin(a) * this.hole_radius;
+                vertex(sx, sy);
+            }
+            endContour();
+            pop();
+        }
     }
 
 }
