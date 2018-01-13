@@ -108,7 +108,7 @@ class Coin {
         fill(indent_color);
         this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
 
-        this.border_inset = this.border_radius / 40;
+        this.border_inset = this.border_radius / 50;
         this.circle(this.x, this.y, this.border_radius, true);
         pop();
 
@@ -165,9 +165,9 @@ class Coin {
         var a = PI;
         for (var i = 0; i < count; i++) {
             a += angle;
-            var x1 = this.x + radius * cos(a) + 2;
-            var y = this.y + radius * sin(a);
-            var x2 = this.x + radius * cos(a + PI) - 2;
+            var x1 = this.x + radius * cos(a) + 2 + this.border_inset;
+            var y = this.y + radius * sin(a) + this.border_inset;
+            var x2 = this.x + radius * cos(a + PI) - 2 + this.border_inset;
             line(x1, y, x2, y);
         }
         pop();
