@@ -295,7 +295,7 @@ class Coin {
             var angle = TWO_PI / this.hole_edges;
             beginContour();
             noStroke();
-            for (var a = TWO_PI; a > 0; a -= angle) {
+            for (var a = TWO_PI + (PI / 5); a > 0 + (PI / 5); a -= angle) {
                 var sx = x + cos(a) * this.hole_radius;
                 var sy = y + sin(a) * this.hole_radius;
                 vertex(sx, sy);
