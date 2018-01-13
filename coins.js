@@ -70,11 +70,24 @@ class Coin {
         noStroke();
         fill(this.shadow_color);
         for (var i = 0; i < this.depth; i++) {
-            eval('this.' + this.shape)(this.x+i, this.y+i, this.radius, this.points, this.point_radius);
+            if (this.shape == 'circle') {
+                this.circle(this.x + i, this.y + i, this.radius);
+            } else if (this.shape == 'star') {
+                this.star(this.x + i, this.y + i, this.radius, this.points, this.point_radius);
+            } else if (this.shape == 'polygon') {
+                this.polygon(this.x + i, this.y + i, this.radius, this.points);
+            }
         }
         pop();
 
-        eval('this.' + this.shape)(this.x, this.y, this.radius, this.points, this.point_radius);
+        if (this.shape == 'circle') {
+            this.circle(this.x, this.y, this.radius);
+        } else if (this.shape == 'star') {
+            this.star(this.x, this.y, this.radius, this.points, this.point_radius);
+        } else if (this.shape == 'polygon') {
+            this.polygon(this.x, this.y, this.radius, this.points);
+        }
+
         pop();
     }
 
@@ -229,8 +242,7 @@ class Coin {
 
     // shape functions
     circle(x, y, radius) {
-        var diameter = radius * 2;
-        return ellipse(x, y, diameter, diameter);
+        this.polygon(x, y, radius, 100);
     }
 
     // taken directly from p5js.org examples
