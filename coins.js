@@ -33,6 +33,9 @@ class Coin {
         this.points = randint(9, 15);
 
         this.metal = color('#DDD');
+        this.depth = randint(3, 5);
+        this.shadow_color = lerpColor(this.metal, black, 0.5);
+        this.default_stroke = lerpColor(this.metal, black, 0.3);
 
         // keep track of which elements have been added to a coin
         this.components = [];
@@ -55,23 +58,24 @@ class Coin {
     }
 
     base() {
+        push();
         fill(this.metal);
-        stroke(lerpColor(this.metal, black, 0.2));
+        stroke(this.default_stroke);
 
         // ----- COIN SHAPE
         this.shape = choose(['circle', 'star', 'polygon'])
 
         // 3 dimensionality;
-        var depth = randint(3, 5);
         push();
-        var shadow_color = lerpColor(this.metal, black, 0.5)
-        fill(shadow_color);
-        for (var i = 0; i < depth; i++) {
+        noStroke();
+        fill(this.shadow_color);
+        for (var i = 0; i < this.depth; i++) {
             eval(this.shape)(this.x+i, this.y+i, this.radius, this.points, this.point_radius);
         }
         pop();
 
         eval(this.shape)(this.x, this.y, this.radius, this.points, this.point_radius);
+        pop();
     }
 
     border() {
@@ -93,6 +97,7 @@ class Coin {
         this.components.push('dots');
         push();
         fill(lerpColor(this.metal, white, 0.8));
+        stroke(this.default_stroke);
         var dot_radius = Math.ceil(this.radius / 70);
         var dot_count = (TWO_PI * this.border_radius) / (dot_radius * 2 + 3);
         var angle = TWO_PI / dot_count;
@@ -136,6 +141,8 @@ class Coin {
         this.components.push('flower');
         push();
 
+        fill(this.metal);
+        stroke(this.default_stroke);
         var concentric = choose([1, 2, 2]);
 
         var points = randint(1, 3) * 2 + 1;
