@@ -56,7 +56,7 @@ class Coin {
 
         if (!this.has_item('hole')) {
             if (Math.random() > 0.65) {
-                this.flower();
+                this.center_flower();
             }
 
             if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.5) {
@@ -173,7 +173,7 @@ class Coin {
         pop();
     }
 
-    flower() {
+    center_flower() {
         this.components.push('flower');
         push();
 
@@ -186,34 +186,45 @@ class Coin {
             var depth = randint(6, 20) / 10;
             var radius = (this.border_radius || this.radius) / (depth + 1);
             radius = radius / (i + 1 - (i * 0.8));
-            var angle = TWO_PI / points;
 
-            var angle_offset = i * angle / 2;
+            // adds shadow
+            push();
+            fill(this.shadow_color);
+            noStroke();
+            this.flower(this.x + 1, this.y + 1, radius, points, depth, i);
+            pop();
 
-            for (var a = angle_offset; a < TWO_PI; a += angle) {
-                var cx1 = this.x + radius * cos(a + (angle / 2));
-                var cy1 = this.y + radius * sin(a + (angle / 2));
-                var x1 = this.x + radius * cos(a + (angle / 4));
-                var y1 = this.y + radius * sin(a + (angle / 4));
-                var cx2 = this.x + (radius * depth) * cos(a);
-                var cy2 = this.y + (radius * depth) * sin(a);
-
-                bezier(this.x, this.y, cx1, cy1, x1, y1, cx2, cy2);
-
-                cx1 = this.x + radius * cos(a - (angle / 2));
-                cy1 = this.y + radius * sin(a - (angle / 2));
-                x1 = this.x + radius * cos(a - (angle / 4));
-                y1 = this.y + radius * sin(a - (angle / 4));
-                cx2 = this.x + (radius * depth) * cos(a);
-                cy2 = this.y + (radius * depth) * sin(a);
-
-                bezier(this.x, this.y, cx1, cy1, x1, y1, cx2, cy2);
-            }
+            this.flower(this.x, this.y, radius, points, depth, i);
         }
 
         this.circle(this.x, this.y, radius * (concentric * 0.8) / 4);
 
         pop();
+    }
+
+    flower(x, y, radius, points, depth, offset) {
+        offset = offset ? 1 : 0;
+        var angle = TWO_PI / points;
+        var angle_offset = offset * angle / 2;
+        for (var a = angle_offset; a < TWO_PI; a += angle) {
+            var cx1 = x + radius * cos(a + (angle / 2));
+            var cy1 = y + radius * sin(a + (angle / 2));
+            var x1 = x + radius * cos(a + (angle / 4));
+            var y1 = y + radius * sin(a + (angle / 4));
+            var cx2 = x + (radius * depth) * cos(a);
+            var cy2 = y + (radius * depth) * sin(a);
+
+            bezier(x, y, cx1, cy1, x1, y1, cx2, cy2);
+
+            cx1 = x + radius * cos(a - (angle / 2));
+            cy1 = y + radius * sin(a - (angle / 2));
+            x1 = x + radius * cos(a - (angle / 4));
+            y1 = y + radius * sin(a - (angle / 4));
+            cx2 = x + (radius * depth) * cos(a);
+            cy2 = y + (radius * depth) * sin(a);
+
+            bezier(x, y, cx1, cy1, x1, y1, cx2, cy2);
+        }
     }
 
     cointext() {
