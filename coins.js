@@ -38,7 +38,7 @@ class Coin {
         this.default_stroke = lerpColor(this.metal, black, 0.3);
 
         // hole info
-        this.hole_edges = random([3, 4, 5, 6, 100]);
+        this.hole_edges = random([4, 5, 6, 100]);
         this.hole_radius = this.radius / random([2.5, 2.75, 3, 3.25, 3.5]);
 
         // keep track of which elements have been added to a coin
@@ -55,16 +55,18 @@ class Coin {
         this.border();
 
         if (!this.has_item('hole')) {
-            if (Math.random() > 0.65) {
+            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.5) {
+                this.crossbars();
+                this.center_text()
+            } else {
                 this.center_flower();
             }
 
-            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.5) {
-                this.crossbars();
-            }
         }
 
-        this.cointext();
+        if (!this.has_item('bars')) {
+            this.border_text();
+        }
     }
 
     base() {
@@ -199,30 +201,57 @@ class Coin {
 
         fill(this.metal);
         stroke(this.default_stroke);
+        var radius = (this.border_radius || this.radius) / 2.5;
+        this.flower(this.x, this.y, radius);
+
+        pop();
+    }
+
+    border_flowers() {
+        var count = this.hole_edges < 10 ? this.hole_edges : 4;
+        var angle = TWO_PI / count;
+        var seed = (new Date).getTime();
+        push();
+        fill(this.metal);
+        stroke(this.default_stroke);
+
+        var angle_offset = this.hole_edges == 4 ? PI / 2.35 : 0;
+        for (var a = angle_offset; a < TWO_PI + (angle_offset); a += angle) {
+            var sx = this.x + cos(a) * (this.border_radius * 0.6);
+            var sy = this.y + sin(a) * (this.border_radius * 0.6);
+
+            this.flower(sx, sy, this.border_radius / 7, seed);
+        }
+        pop()
+    }
+
+    flower(x, y, radius, seed) {
+        if (seed) {
+            randomSeed(seed);
+        }
         var concentric = random([1, 2, 2]);
 
-        var points = randint(1, 3) * 2 + 1;
+        var points = Math.floor(random(1, 4)) * 2 + 1;
         for (var i = 0; i < concentric; i++) {
-            var depth = randint(6, 20) / 10;
-            var radius = (this.border_radius || this.radius) / (depth + 1);
+            var depth = Math.floor(random(6, 21)) / 10;
             radius = radius / (i + 1 - (i * 0.8));
 
             // adds shadow
             push();
             fill(this.shadow_color);
             noStroke();
-            this.flower(this.x + 1, this.y + 1, radius, points, depth, i);
+            this.flower_part(x + 1, y + 1, radius, points, depth, i);
             pop();
 
-            this.flower(this.x, this.y, radius, points, depth, i);
+            this.flower_part(x, y, radius, points, depth, i);
         }
-
-        this.circle(this.x, this.y, radius * (concentric * 0.8) / 4);
-
-        pop();
+        this.circle(x, y, radius * (concentric * 0.8) / 4);
+        if (seed) {
+            randomSeed((new Date).getTime());
+        }
     }
 
-    flower(x, y, radius, points, depth, offset) {
+    flower_part(x, y, radius, points, depth, offset) {
         offset = offset ? 1 : 0;
         var angle = TWO_PI / points;
         var angle_offset = offset * angle / 2;
@@ -247,7 +276,7 @@ class Coin {
         }
     }
 
-    cointext() {
+    border_text() {
         this.components.push('text');
         push();
         textFont(lato);
@@ -257,37 +286,47 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.3));
         var message = '1 EURO';
 
-        if (!this.has_item('bars')) {
-            message = '1EURO';
-            textSize(this.radius/6);
-            message = message.split('');
+        message = '1EURO';
+        textSize(this.radius/6);
+        message = message.split('');
 
-            var radius = (this.border_radius || this.radius) * 0.65;
-            var inset = this.border_inset
-            // place the text on the outside edge
-            if (this.radius - this.border_radius > (this.radius / 4)) {
-                var modifier = this.has_item('circle') ? 0.8 : 0.7;
-                radius = this.radius * modifier;
-                inset = 0;
-            }
-
-            // shadow
-            push();
-            noStroke();
-            fill(this.shadow_color);
-            this.rotated_text(this.x + 1, this.y + 1, message, radius, inset);
-            pop();
-
-            this.rotated_text(this.x, this.y, message, radius, inset)
-        } else {
-            textSize(this.radius/3.5);
-            push();
-            fill(this.shadow_color);
-            text('1 EURO', this.x + 0.5, this.y + 0.5);
-            pop();
-            text('1 EURO', this.x, this.y);
+        var radius = (this.border_radius || this.radius) * 0.65;
+        var inset = this.border_inset
+        // place the text on the outside edge
+        if (this.radius - this.border_radius > (this.radius / 4)) {
+            var modifier = this.has_item('circle') ? 0.8 : 0.7;
+            radius = this.radius * modifier;
+            inset = 0;
         }
+
+        // shadow
+        push();
+        noStroke();
+        fill(this.shadow_color);
+        this.rotated_text(this.x + 1, this.y + 1, message, radius, inset);
         pop();
+
+        this.rotated_text(this.x, this.y, message, radius, inset)
+        pop();
+    }
+
+    center_text() {
+        this.components.push('text');
+        push();
+        textFont(lato);
+        textAlign(CENTER, TOP);
+        textSize(this.radius/3.5);
+        fill(lerpColor(this.metal, white, 0.3));
+        stroke(lerpColor(this.metal, black, 0.3));
+
+        // shadow
+        push();
+        fill(this.shadow_color);
+        text('1 EURO', this.x + 0.75, this.y + 0.75);
+        pop();
+
+        text('1 EURO', this.x, this.y);
+        pop()
     }
 
     rotated_text(x, y, message, radius, inset) {
