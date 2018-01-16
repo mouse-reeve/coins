@@ -446,5 +446,5 @@ class Coin {
 
 function randint(min, max) {
     max += 1;
-    return Math.floor((Math.random() * (max - min)) + min);
+    return Math.floor((random() * (max - min)) + min);
 }
