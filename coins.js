@@ -1,4 +1,5 @@
 var black, white;
+var lato;
 
 function preload() {
     lato = loadFont('Lato-Bold.ttf');
