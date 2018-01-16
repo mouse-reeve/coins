@@ -18,15 +18,19 @@ function setup() {
     canvas.parent(container);
 
     var text = container.getAttribute('data-text');
+    var seed = container.getAttribute('data-seed');
 
-    var coin = new Coin(text);
+    var coin = new Coin(text, seed);
     coin.draw_coin();
 
     noLoop();
 }
 
 class Coin {
-    constructor(text) {
+    constructor(text, seed) {
+        this.seed = seed || (new Date).getTime();
+        randomSeed(this.seed);
+
         this.text = text;
 
         this.radius = randint(40, 90);
@@ -254,7 +258,7 @@ class Coin {
         }
         this.circle(x, y, radius * (concentric * 0.8) / 4);
         if (seed) {
-            randomSeed((new Date).getTime());
+            randomSeed(this.seed);
         }
     }
 
