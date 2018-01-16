@@ -57,7 +57,7 @@ class Coin {
     }
 
     draw_coin() {
-        if (Math.random() > 0.7) {
+        if (random() > 0.7) {
             this.components.push('hole');
         }
 
@@ -66,7 +66,7 @@ class Coin {
         this.border();
 
         if (!this.has_item('hole')) {
-            if (!this.has_item('dots') && !this.has_item('flower') && Math.random() > 0.5) {
+            if (!this.has_item('dots') && !this.has_item('flower') && random() > 0.5) {
                 this.crossbars();
                 this.center_text()
             } else {
@@ -134,7 +134,7 @@ class Coin {
 
 
         // there are often dots around the border
-        if (Math.random() > 0.3) {
+        if (random() > 0.3) {
             this.border_dots();
         }
     }
@@ -151,7 +151,7 @@ class Coin {
         var offset = 2;
         var inset = this.border_inset / 2;
         // with a large border, you can put the dots inside
-        if (this.radius - this.border_radius > 11 && Math.random() > 0.6) {
+        if (this.radius - this.border_radius > 11 && random() > 0.6) {
             var offset = -1 * (4 + dot_radius);
             inset = 0;
             fill(lerpColor(this.metal, black, 0.1));
@@ -333,10 +333,10 @@ class Coin {
         // shadow
         push();
         fill(this.shadow_color);
-        text('1 EURO', this.x + 0.75, this.y + 0.75);
+        text(this.text, this.x + 0.75, this.y + 0.75);
         pop();
 
-        text('1 EURO', this.x, this.y);
+        text(this.text, this.x, this.y);
         pop()
     }
 
