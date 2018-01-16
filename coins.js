@@ -1,15 +1,19 @@
 var black, white;
-var lato;
+var container;
+var font;
 
 function preload() {
-    lato = loadFont('Lato-Bold.ttf');
+    container = document.getElementById('coin');
+    font_path = container.getAttribute('data-font');
+    if (font_path) {
+        font = loadFont(font_path);
+    }
 }
 
 function setup() {
     black = color('#000');
     white = color('#FFF');
 
-    var container = document.getElementById('coin');
     var canvas = createCanvas(200, 200);
     canvas.parent(container);
 
@@ -282,7 +286,7 @@ class Coin {
     border_text() {
         this.components.push('text');
         push();
-        textFont(lato);
+        textFont(font);
         textAlign(CENTER, TOP);
 
         fill(lerpColor(this.metal, white, 0.3));
@@ -314,7 +318,7 @@ class Coin {
     center_text() {
         this.components.push('text');
         push();
-        textFont(lato);
+        textFont(font);
         textAlign(CENTER, TOP);
         textSize(this.radius/3.5);
         fill(lerpColor(this.metal, white, 0.3));
