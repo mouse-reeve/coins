@@ -34,6 +34,7 @@ class Coin {
         this.text = text;
 
         this.radius = randint(40, 90);
+        this.available_radius = this.radius;
 
         // position correctly on screen
         this.x = height / 2;//this.radius;
@@ -50,33 +51,33 @@ class Coin {
 
         // hole info
         this.hole_edges = random([4, 5, 6, 100]);
-        this.hole_radius = this.radius / random([2.5, 2.75, 3, 3.25, 3.5]);
 
         // keep track of which elements have been added to a coin
         this.components = [];
     }
 
     draw_coin() {
+        this.hole_radius = this.available_radius / random([2.5, 2.75, 3, 3.25, 3.5]);
         if (random() > 0.7) {
             this.components.push('hole');
         }
-
         this.base();
+
         // it seems like almost all coins have a border.
         this.border();
 
-        if (!this.has_item('hole')) {
-            if (!this.has_item('dots') && !this.has_item('flower') && random() > 0.5) {
-                this.crossbars();
-                this.center_text()
-            } else {
-                this.center_flower();
-            }
+        this.straight_mode = !this.has_item('dots') && !this.has_item('hole') && random() > 0.6;
 
+        if (this.straight_mode) {
+            this.crossbars();
+            this.center_text()
+            return;
         }
 
-        if (!this.has_item('bars')) {
-            this.border_text();
+        this.border_text();
+
+        if (!this.has_item('hole')) {
+            this.center_flower();
         }
     }
 
@@ -96,8 +97,10 @@ class Coin {
             if (this.shape == 'circle') {
                 this.circle(this.x + i, this.y + i, this.radius, true);
             } else if (this.shape == 'star') {
+                this.available_radius = this.point_radius;
                 this.star(this.x + i, this.y + i, this.radius, this.points, this.point_radius, true);
             } else if (this.shape == 'polygon') {
+                this.available_radius = this.point_radius;
                 this.polygon(this.x + i, this.y + i, this.radius, this.points, true);
             }
         }
@@ -120,6 +123,9 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.2));
         fill(indent_color);
         this.border_radius = this.point_radius - (this.point_radius / randint(3, 20));
+        this.border_radius_available = this.available_radius - this.border_radius;
+        
+        this.available_radius = this.border_radius * 0.95;
 
         this.border_inset = this.border_radius / 50;
         this.circle(this.x, this.y, this.border_radius, true);
@@ -152,10 +158,12 @@ class Coin {
         var inset = this.border_inset / 2;
         // with a large border, you can put the dots inside
         if (this.radius - this.border_radius > 11 && random() > 0.6) {
+            this.border_radius_available -= this.dot_radius;
             var offset = -1 * (4 + dot_radius);
             inset = 0;
             fill(lerpColor(this.metal, black, 0.1));
         }
+        this.available_radius -= (dot_radius * 6);
 
         push();
         fill(this.shadow_color);
@@ -212,8 +220,9 @@ class Coin {
 
         fill(this.metal);
         stroke(this.default_stroke);
-        var radius = (this.border_radius || this.radius) / 2.5;
+        var radius = (this.available_radius) * 0.9;
         this.flower(this.x, this.y, radius);
+        this.available_radius -= radius;
 
         pop();
     }
@@ -245,7 +254,11 @@ class Coin {
         var points = Math.floor(random(1, 6)) * 2 + 1;
         for (var i = 0; i < concentric; i++) {
             var depth = Math.floor(random(6, 21)) / 10;
+            
             radius = radius / (i + 1 - (i * 0.8));
+            if (depth > 1) {
+                radius = radius / depth;
+            }
 
             // adds shadow
             push();
@@ -298,16 +311,20 @@ class Coin {
         fill(lerpColor(this.metal, white, 0.3));
         stroke(lerpColor(this.metal, black, 0.3));
 
-        textSize(this.radius/6);
+        var text_size = this.available_radius / 4;
 
-        var radius = (this.border_radius || this.radius) * 0.65;
+        var radius = this.available_radius - text_size;
         var inset = this.border_inset
         // place the text on the outside edge
-        if (this.radius - this.border_radius > (this.radius / 4)) {
-            var modifier = this.has_item('circle') ? 0.8 : 0.7;
-            radius = this.radius * modifier;
+        if (this.border_radius_available > 10) {
+            text_size = this.border_radius_available * 0.7;
+                radius = this.border_radius;
             inset = 0;
+        } else {
+            // only change the available radius if the text is inset
+            this.available_radius -= (this.available_radius - radius) * 1.05;
         }
+        textSize(text_size);
 
         // shadow
         push();
