@@ -242,7 +242,7 @@ class Coin {
         }
         var concentric = random([1, 2, 2]);
 
-        var points = Math.floor(random(1, 4)) * 2 + 1;
+        var points = Math.floor(random(1, 6)) * 2 + 1;
         for (var i = 0; i < concentric; i++) {
             var depth = Math.floor(random(6, 21)) / 10;
             radius = radius / (i + 1 - (i * 0.8));
@@ -299,7 +299,6 @@ class Coin {
         stroke(lerpColor(this.metal, black, 0.3));
 
         textSize(this.radius/6);
-        var message = this.text.split('') || '';
 
         var radius = (this.border_radius || this.radius) * 0.65;
         var inset = this.border_inset
@@ -314,17 +313,19 @@ class Coin {
         push();
         noStroke();
         fill(this.shadow_color);
-        this.rotated_text(this.x + 1, this.y + 1, message, radius, inset);
+        this.rotated_text(this.x + 1, this.y + 1, this.text, radius, inset);
         pop();
 
-        this.rotated_text(this.x, this.y, message, radius, inset)
+        this.rotated_text(this.x, this.y, this.text, radius, inset)
         pop();
     }
 
     center_text() {
         this.components.push('text');
         push();
-        textFont(font);
+        if (font) {
+            textFont(font);
+        }
         textAlign(CENTER, TOP);
         textSize(this.radius/3.5);
         fill(lerpColor(this.metal, white, 0.3));
@@ -341,6 +342,14 @@ class Coin {
     }
 
     rotated_text(x, y, message, radius, inset) {
+        if (message.length < 8) {
+            var pad = '';
+            for (var i = 0; i < Math.floor(8 - message.length) / 2; i++) {
+                pad += ' '
+            }
+            message = pad + ' ' + message + pad;
+        }
+        message = message.split('') || '';
         var multipliers = [];
         for (i = 0 - message.length / 2; i < message.length / 2; i++) {
             multipliers.push(i);
