@@ -361,8 +361,8 @@ class Coin {
     rotated_text(x, y, message, radius, inset) {
         if (message.length < 8) {
             var pad = '';
-            for (var i = 0; i < Math.floor(8 - message.length) / 2; i++) {
-                pad += ' '
+            for (var i = 0; i < Math.floor(6 - message.length) / 2; i++) {
+                pad += ' ';
             }
             message = pad + ' ' + message + pad;
         }
