@@ -5,7 +5,7 @@ var font;
 function preload() {
     container = document.getElementById('coin');
     font_path = container.getAttribute('data-font');
-    if (font_path) {
+    if (!!font_path) {
         font = loadFont(font_path);
     }
 }
@@ -286,7 +286,9 @@ class Coin {
     border_text() {
         this.components.push('text');
         push();
-        textFont(font);
+        if (font) {
+            textFont(font);
+        }
         textAlign(CENTER, TOP);
 
         fill(lerpColor(this.metal, white, 0.3));
