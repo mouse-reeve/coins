@@ -5,28 +5,30 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(500, 500);
-
     black = color('#000');
     white = color('#FFF');
 
-    for (var i = 0; i < 3; i++) {
-        for (var j = 0; j < 3; j++) {
-            var coin = new Coin(10 + 150 * i, 10 + 150 * j);
-            coin.draw_coin();
-        }
-    }
+    var container = document.getElementById('coin');
+    var canvas = createCanvas(200, 200);
+    canvas.parent(container);
+
+    var text = container.getAttribute('data-text');
+
+    var coin = new Coin(text);
+    coin.draw_coin();
 
     noLoop();
 }
 
 class Coin {
-    constructor(x, y) {
+    constructor(text) {
+        this.text = text;
+
         this.radius = randint(40, 90);
 
         // position correctly on screen
-        this.x = x + this.radius;
-        this.y = y + this.radius;
+        this.x = height / 2;//this.radius;
+        this.y = width / 2;//this.radius;
 
         this.point_radius = this.radius - (this.radius / randint(15, 20));
         // points on a star or sides of a polygon
@@ -284,11 +286,9 @@ class Coin {
 
         fill(lerpColor(this.metal, white, 0.3));
         stroke(lerpColor(this.metal, black, 0.3));
-        var message = '1 EURO';
 
-        message = '1EURO';
         textSize(this.radius/6);
-        message = message.split('');
+        var message = this.text.split('') || '';
 
         var radius = (this.border_radius || this.radius) * 0.65;
         var inset = this.border_inset
